@@ -16,8 +16,6 @@ import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-type
 import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
-type RawContentNode = { type: string; text?: string }
-
 type RawBlock = {
   type: string
   content?: unknown
@@ -26,26 +24,17 @@ type RawBlock = {
   [key: string]: unknown
 }
 
-// 구 버전 codeBlock(인라인 content)을 새 형식(code prop)으로 마이그레이션
+// 구 커스텀 codeBlock(props.code 형식) → 공식 인라인 content 형식으로 마이그레이션
 function migrateBlocks(blocks: RawBlock[]): RawBlock[] {
   return blocks.map((block) => {
-    if (block.type === 'codeBlock' && Array.isArray(block.content)) {
-      const code = (block.content as RawContentNode[])
-        .map((node) => {
-          if (node.type === 'text') return node.text ?? '';
-          if (node.type === 'hardBreak') return '\n';
-          return '';
-        })
-        .join('');
+    if (block.type === 'codeBlock' && typeof block.props?.code === 'string') {
+      const code = block.props.code
+      const language = (block.props.language as string | undefined) ?? 'text'
       return {
         ...block,
-        content: undefined,
-        props: {
-          ...block.props,
-          code,
-          language: (block.props?.language as string | undefined) ?? 'plaintext',
-        },
-      };
+        props: { language },
+        content: code ? [{ type: 'text', text: code, styles: {} }] : [],
+      }
     }
     if (block.children?.length) {
       return { ...block, children: migrateBlocks(block.children) };
@@ -137,7 +126,7 @@ export const EditorContent = forwardRef<
         e.preventDefault();
         editor.updateBlock(block, {
           type: 'codeBlock',
-          props: { code: '', language: 'plaintext' },
+          props: { language: 'text' },
         });
       }
     }
