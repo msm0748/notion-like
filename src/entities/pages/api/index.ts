@@ -23,6 +23,7 @@ export const getPages = async (params?: {
       .select('*, favorites!inner(id)')
       .eq('userId', userId)
       .eq('isTrashed', false)
+      .is('parentId', null)
       .order('updatedAt', { ascending: false });
 
     if (error) throw new Error(error.message);

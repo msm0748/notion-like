@@ -20,6 +20,7 @@ import {
   useToggleFavoriteMutation,
   SearchModal,
 } from '@/features/pages';
+
 import { pagesQueryOptions } from '@/entities/pages';
 import { PageRow } from './page-row';
 
@@ -57,16 +58,6 @@ export function Sidebar() {
       navigate({ to: '/page/$pageId', params: { pageId: id } });
     } catch (err) {
       console.error('페이지 생성 실패:', err);
-    }
-  };
-
-  const handleCreateSubPage = async (parentId: string) => {
-    if (!user) return;
-    try {
-      const { id } = await createPage(parentId);
-      navigate({ to: '/page/$pageId', params: { pageId: id } });
-    } catch (err) {
-      console.error('하위 페이지 생성 실패:', err);
     }
   };
 
@@ -151,7 +142,6 @@ export function Sidebar() {
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
-                onCreateSubPage={handleCreateSubPage}
               />
             ))}
           </Box>
@@ -202,7 +192,6 @@ export function Sidebar() {
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
-                onCreateSubPage={handleCreateSubPage}
               />
             ))}
           </Box>
