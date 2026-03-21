@@ -16,6 +16,31 @@ import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-type
 import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
+// 구 버전 codeBlock(인라인 content)을 새 형식(code prop)으로 마이그레이션
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function migrateBlocks(blocks: any[]): any[] {
+  return blocks.map((block) => {
+    if (block.type === 'codeBlock' && Array.isArray(block.content)) {
+      const code = block.content
+        .map((node: any) => {
+          if (node.type === 'text') return node.text ?? '';
+          if (node.type === 'hardBreak') return '\n';
+          return '';
+        })
+        .join('');
+      return {
+        ...block,
+        content: undefined,
+        props: { ...block.props, code, language: block.props?.language ?? 'plaintext' },
+      };
+    }
+    if (block.children?.length) {
+      return { ...block, children: migrateBlocks(block.children) };
+    }
+    return block;
+  });
+}
+
 function collectSubPageIds(blocks: EditorBlock[]): Set<string> {
   const ids = new Set<string>();
   for (const block of blocks) {
@@ -46,9 +71,11 @@ export const EditorContent = forwardRef<
   EditorContentHandle,
   EditorContentProps
 >(({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
+  const migratedContent = initialContent ? migrateBlocks(initialContent) : undefined;
+
   const editor = useCreateBlockNote({
     schema: editorSchema,
-    initialContent,
+    initialContent: migratedContent,
   });
 
   useImperativeHandle(ref, () => ({
@@ -93,15 +120,7 @@ export const EditorContent = forwardRef<
         content[0].text === '``'
       ) {
         e.preventDefault();
-        const blockIndex = editor.document.findIndex((b) => b.id === block.id);
-        editor.replaceBlocks([block], [{ type: 'codeBlock', content: '' }]);
-        requestAnimationFrame(() => {
-          const newBlock = editor.document[blockIndex];
-          if (newBlock) {
-            editor.focus();
-            editor.setTextCursorPosition(newBlock, 'start');
-          }
-        });
+        editor.updateBlock(block, { type: 'codeBlock', props: { code: '', language: 'plaintext' } });
       }
     }
   };
@@ -146,6 +165,11 @@ export const EditorContent = forwardRef<
             { transform: 'translateY(-18px)' },
           '& :where(.bn-side-menu)[data-block-type="heading"][data-level="2"]':
             { transform: 'translateY(-4px)' },
+          /* codeBlock(content:none) 컨테이너가 inline-block으로 축소되는 문제 수정 */
+          '& .bn-block-content[data-content-type="codeBlock"]': {
+            display: 'block',
+            width: '100%',
+          },
         }}
       >
         {/* 에디터 본문: Heading 1 → h2, Heading 2 → h3, ... */}
