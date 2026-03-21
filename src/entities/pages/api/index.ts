@@ -22,6 +22,7 @@ export const getPages = async (params?: {
       .from('pages')
       .select('*, favorites!inner(id)')
       .eq('userId', userId)
+      .eq('isTrashed', false)
       .order('updatedAt', { ascending: false });
 
     if (error) throw new Error(error.message);
@@ -37,6 +38,7 @@ export const getPages = async (params?: {
     .from('pages')
     .select('*')
     .eq('userId', userId)
+    .eq('isTrashed', false)
     .is('parentId', null)
     .order('updatedAt', { ascending: false });
 
@@ -106,6 +108,18 @@ export const getChildPages = async (parentId: string): Promise<PageDto[]> => {
     .eq('userId', userId)
     .eq('parentId', parentId)
     .eq('isTrashed', false)
+    .order('updatedAt', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PageDto[];
+};
+
+export const getTrashedPages = async (): Promise<PageDto[]> => {
+  const userId = await getCurrentUserId();
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('userId', userId)
+    .eq('isTrashed', true)
     .order('updatedAt', { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as PageDto[];

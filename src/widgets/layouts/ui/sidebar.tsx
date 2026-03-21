@@ -227,7 +227,7 @@ export function Sidebar() {
       {/* Trash */}
       <Box mt="auto" pt="sm">
         <Link
-          to="/"
+          to="/trash"
           label={
             <Text size="sm" fw={400} c="var(--mantine-color-notionGray-7)">
               Trash

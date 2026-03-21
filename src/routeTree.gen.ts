@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteRouteImport } from './routes/_layout/route'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutTrashIndexRouteImport } from './routes/_layout/trash/index'
 import { Route as LayoutPagePageIdIndexRouteImport } from './routes/_layout/page/$pageId/index'
 
 const LayoutRouteRoute = LayoutRouteRouteImport.update({
@@ -28,6 +29,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRouteRoute,
 } as any)
+const LayoutTrashIndexRoute = LayoutTrashIndexRouteImport.update({
+  id: '/trash/',
+  path: '/trash/',
+  getParentRoute: () => LayoutRouteRoute,
+} as any)
 const LayoutPagePageIdIndexRoute = LayoutPagePageIdIndexRouteImport.update({
   id: '/page/$pageId/',
   path: '/page/$pageId/',
@@ -37,11 +43,13 @@ const LayoutPagePageIdIndexRoute = LayoutPagePageIdIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/trash/': typeof LayoutTrashIndexRoute
   '/page/$pageId/': typeof LayoutPagePageIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginIndexRoute
+  '/trash': typeof LayoutTrashIndexRoute
   '/page/$pageId': typeof LayoutPagePageIdIndexRoute
 }
 export interface FileRoutesById {
@@ -49,18 +57,20 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteRouteWithChildren
   '/_layout/': typeof LayoutIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/_layout/trash/': typeof LayoutTrashIndexRoute
   '/_layout/page/$pageId/': typeof LayoutPagePageIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login/' | '/page/$pageId/'
+  fullPaths: '/' | '/login/' | '/trash/' | '/page/$pageId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/page/$pageId'
+  to: '/' | '/login' | '/trash' | '/page/$pageId'
   id:
     | '__root__'
     | '/_layout'
     | '/_layout/'
     | '/login/'
+    | '/_layout/trash/'
     | '/_layout/page/$pageId/'
   fileRoutesById: FileRoutesById
 }
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRouteRoute
     }
+    '/_layout/trash/': {
+      id: '/_layout/trash/'
+      path: '/trash'
+      fullPath: '/trash/'
+      preLoaderRoute: typeof LayoutTrashIndexRouteImport
+      parentRoute: typeof LayoutRouteRoute
+    }
     '/_layout/page/$pageId/': {
       id: '/_layout/page/$pageId/'
       path: '/page/$pageId'
@@ -104,11 +121,13 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteRouteChildren {
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutTrashIndexRoute: typeof LayoutTrashIndexRoute
   LayoutPagePageIdIndexRoute: typeof LayoutPagePageIdIndexRoute
 }
 
 const LayoutRouteRouteChildren: LayoutRouteRouteChildren = {
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutTrashIndexRoute: LayoutTrashIndexRoute,
   LayoutPagePageIdIndexRoute: LayoutPagePageIdIndexRoute,
 }
 

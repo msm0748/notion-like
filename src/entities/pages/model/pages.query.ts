@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getPage, getPages, searchPages, getChildPages } from '../api';
+import { getPage, getPages, searchPages, getChildPages, getTrashedPages } from '../api';
 
 export const pagesKeys = {
   all: ['pages'] as const,
@@ -11,6 +11,7 @@ export const pagesKeys = {
   searches: () => [...pagesKeys.all, 'search'] as const,
   search: (query: string) => [...pagesKeys.searches(), query] as const,
   children: (parentId: string) => [...pagesKeys.all, 'children', parentId] as const,
+  trash: () => [...pagesKeys.all, 'trash'] as const,
 };
 
 export const pagesQueryOptions = {
@@ -42,5 +43,11 @@ export const pagesQueryOptions = {
     queryOptions({
       queryKey: pagesKeys.children(parentId),
       queryFn: () => getChildPages(parentId),
+    }),
+
+  trash: () =>
+    queryOptions({
+      queryKey: pagesKeys.trash(),
+      queryFn: () => getTrashedPages(),
     }),
 };
