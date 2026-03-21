@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Box, Group, Text, ActionIcon, Menu, rem } from '@mantine/core';
-import { Trash2, MoreVertical, FileText, Star, ChevronRight, Plus } from 'lucide-react';
+import {
+  Trash2,
+  MoreVertical,
+  FileText,
+  Star,
+  ChevronRight,
+  Plus,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@/shared/ui/link';
 import { DEFAULT_TITLE } from '@/shared/conf/constant';
@@ -165,7 +172,9 @@ export function PageRow({
                       fill={isFavorite ? 'currentColor' : 'none'}
                     />
                   }
-                  onClick={() => onToggleFavorite({ pageId: page.id, isFavorite })}
+                  onClick={() =>
+                    onToggleFavorite({ pageId: page.id, isFavorite })
+                  }
                 >
                   {isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
                 </Menu.Item>
@@ -179,7 +188,7 @@ export function PageRow({
                   color="red"
                   onClick={() => onDelete(page.id)}
                 >
-                  삭제
+                  휴지통으로 이동
                 </Menu.Item>
               </Menu.Dropdown>
             </Menu>

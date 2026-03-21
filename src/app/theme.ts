@@ -1,4 +1,4 @@
-import { colorsTuple, createTheme, virtualColor } from '@mantine/core'
+import { colorsTuple, createTheme, virtualColor } from '@mantine/core';
 
 /**
  * Notion 디자인 시스템 기반 Mantine 테마
@@ -194,6 +194,11 @@ export const theme = createTheme({
         radius: 'md',
       },
     },
+    LavLink: {
+      styles: {
+        color: 'red',
+      },
+    },
     ActionIcon: {
       defaultProps: {
         radius: 'md',
@@ -211,4 +216,4 @@ export const theme = createTheme({
       },
     },
   },
-})
+});

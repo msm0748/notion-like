@@ -1,70 +1,20 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Box, Text, Group, ActionIcon, rem, Stack } from '@mantine/core';
+import { Box, Text, Group, rem, Stack, Modal, Button } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, RotateCcw, X, FileText } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { pagesQueryOptions } from '@/entities/pages';
-import { useRestorePageMutation, usePermanentDeleteMutation } from '@/features/pages';
+import {
+  useRestorePageMutation,
+  usePermanentDeleteMutation,
+} from '@/features/pages';
 import { DEFAULT_TITLE } from '@/shared/conf/constant';
 import type { PageDto } from '@/entities/pages/type';
+import { TrashItem } from './-ui/trash-item';
 
 export const Route = createFileRoute('/_layout/trash/')({
   component: TrashPage,
 });
-
-function TrashItem({
-  page,
-  onRestore,
-  onPermanentDelete,
-}: {
-  page: PageDto;
-  onRestore: (id: string) => void;
-  onPermanentDelete: (id: string) => void;
-}) {
-  return (
-    <Group
-      wrap="nowrap"
-      gap="sm"
-      px="md"
-      py="xs"
-      sx={{
-        borderRadius: 'var(--mantine-radius-sm)',
-        '&:hover': {
-          backgroundColor: 'var(--mantine-color-notionGray-1)',
-        },
-      }}
-    >
-      <FileText
-        style={{ width: rem(16), height: rem(16), flexShrink: 0 }}
-        color="var(--mantine-color-notionGray-5)"
-      />
-      <Text size="sm" truncate style={{ flex: 1 }}>
-        {page.title?.trim() || DEFAULT_TITLE}
-      </Text>
-      <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          size="sm"
-          onClick={() => onRestore(page.id)}
-          aria-label="복원"
-          title="복원"
-        >
-          <RotateCcw style={{ width: rem(14), height: rem(14) }} />
-        </ActionIcon>
-        <ActionIcon
-          variant="subtle"
-          color="red"
-          size="sm"
-          onClick={() => onPermanentDelete(page.id)}
-          aria-label="영구 삭제"
-          title="영구 삭제"
-        >
-          <X style={{ width: rem(14), height: rem(14) }} />
-        </ActionIcon>
-      </Group>
-    </Group>
-  );
-}
 
 function TrashPage() {
   const { data: trashedPages = [], isLoading } = useQuery(
@@ -72,6 +22,14 @@ function TrashPage() {
   );
   const { mutate: restorePage } = useRestorePageMutation();
   const { mutate: permanentlyDelete } = usePermanentDeleteMutation();
+  const [deleteTarget, setDeleteTarget] = useState<PageDto | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      permanentlyDelete(deleteTarget.id);
+      setDeleteTarget(null);
+    }
+  };
 
   return (
     <Box h="100%" display="flex" sx={{ flexDirection: 'column' }}>
@@ -125,12 +83,35 @@ function TrashPage() {
                 key={page.id}
                 page={page}
                 onRestore={(id) => restorePage(id)}
-                onPermanentDelete={(id) => permanentlyDelete(id)}
+                onPermanentDelete={() => setDeleteTarget(page)}
               />
             ))}
           </Stack>
         )}
       </Box>
+
+      <Modal
+        opened={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="영구 삭제"
+        centered
+        size="sm"
+      >
+        <Text size="sm" mb="lg">
+          <Text component="span" fw={600}>
+            {deleteTarget?.title?.trim() || DEFAULT_TITLE}
+          </Text>
+          을(를) 영구적으로 삭제할까요? 이 작업은 되돌릴 수 없어요.
+        </Text>
+        <Group justify="flex-end" gap="xs">
+          <Button variant="default" onClick={() => setDeleteTarget(null)}>
+            취소
+          </Button>
+          <Button color="red" onClick={handleConfirmDelete}>
+            삭제
+          </Button>
+        </Group>
+      </Modal>
     </Box>
   );
 }
