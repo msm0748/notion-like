@@ -55,12 +55,10 @@ export const getPage = async (pageId: string): Promise<PageDto | null> => {
     .select('*, favorites!left(id)')
     .eq('id', pageId)
     .eq('userId', userId)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    if (error.code === 'PGRST116') return null;
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
+  if (!page) return null;
 
   const { favorites: favs, ...pageData } = page as PageDto & {
     favorites: { id: string }[];

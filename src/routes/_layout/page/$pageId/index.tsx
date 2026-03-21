@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { TopNav } from '@/widgets/layouts';
 import { Box, Title } from '@mantine/core';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import type { Block } from '@blocknote/core';
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
-import { useUpdatePageMutation, useCreatePageMutation } from '@/features/pages';
+import { useUpdatePageMutation, useCreatePageMutation, useDeletePageMutation } from '@/features/pages';
 import { EditorContent, type EditorContentHandle } from '@/features/editor';
 
 export const Route = createFileRoute('/_layout/page/$pageId/')({
@@ -20,6 +20,8 @@ function PageEditor() {
   const initialTitleSetRef = useRef(false);
   const { mutate: updatePage } = useUpdatePageMutation();
   const { mutateAsync: createPage } = useCreatePageMutation();
+  const { mutate: deletePage } = useDeletePageMutation();
+  const navigate = useNavigate();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const editorRef = useRef<EditorContentHandle>(null);
 
@@ -90,15 +92,20 @@ function PageEditor() {
     };
   }, [savePage]);
 
+  const handleDeleteSubPage = useCallback((subPageId: string) => {
+    deletePage(subPageId);
+  }, [deletePage]);
+
   const handleCreateSubPage = useCallback(async (): Promise<string | undefined> => {
     try {
       const { id } = await createPage(pageId);
+      navigate({ to: '/page/$pageId', params: { pageId: id } });
       return id;
     } catch (err) {
       console.error('하위 페이지 생성 실패:', err);
       return undefined;
     }
-  }, [createPage, pageId]);
+  }, [createPage, pageId, navigate]);
 
   const initialContent = Array.isArray(page?.content)
     ? (page.content as Block[])
@@ -158,6 +165,7 @@ function PageEditor() {
           initialContent={initialContent}
           onChange={handleContentChange}
           onCreateSubPage={handleCreateSubPage}
+          onDeleteSubPage={handleDeleteSubPage}
         />
       )}
     </Box>

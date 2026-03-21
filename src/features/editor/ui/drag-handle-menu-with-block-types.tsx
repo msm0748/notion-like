@@ -43,6 +43,10 @@ function BlockTypeMenuItems() {
 
   if (!block || !editor) return null
 
+  if (block.type === 'subPageLink') {
+    return <RemoveBlockItem>Delete</RemoveBlockItem>
+  }
+
   return (
     <>
       {items.map((item) => {

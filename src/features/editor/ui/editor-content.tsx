@@ -2,7 +2,7 @@ import '@blocknote/core/fonts/inter.css'
 import '@blocknote/mantine/style.css'
 import type { Block } from '@blocknote/core'
 import { Box } from '@mantine/core'
-import { useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { FileText } from 'lucide-react'
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant'
 import { BlockNoteView } from '@blocknote/mantine'
@@ -18,10 +18,26 @@ import {
 import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-types'
 import { editorSchema } from '../conf/editor-schema'
 
+function collectSubPageIds(blocks: Block[]): Set<string> {
+  const ids = new Set<string>()
+  for (const block of blocks) {
+    if (block.type === 'subPageLink' && (block.props as { pageId?: string }).pageId) {
+      ids.add((block.props as { pageId: string }).pageId)
+    }
+    if (block.children?.length) {
+      for (const id of collectSubPageIds(block.children as Block[])) {
+        ids.add(id)
+      }
+    }
+  }
+  return ids
+}
+
 interface EditorContentProps {
   initialContent?: Block[]
   onChange?: (content: Block[]) => void
   onCreateSubPage?: () => Promise<string | undefined>
+  onDeleteSubPage?: (pageId: string) => void
 }
 
 export interface EditorContentHandle {
@@ -29,7 +45,7 @@ export interface EditorContentHandle {
 }
 
 export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>(
-  ({ initialContent, onChange, onCreateSubPage }, ref) => {
+  ({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
   const editor = useCreateBlockNote({
     schema: editorSchema,
     initialContent,
@@ -44,12 +60,26 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
     },
   }))
 
+  const prevSubPageIdsRef = useRef<Set<string>>(
+    initialContent ? collectSubPageIds(initialContent) : new Set(),
+  )
+
   useEffect(() => {
-    if (!onChange) return
     return editor.onChange(() => {
-      onChange(editor.document as Block[])
+      const doc = editor.document as Block[]
+      onChange?.(doc)
+
+      if (onDeleteSubPage) {
+        const currentIds = collectSubPageIds(doc)
+        for (const id of prevSubPageIdsRef.current) {
+          if (!currentIds.has(id)) {
+            onDeleteSubPage(id)
+          }
+        }
+        prevSubPageIdsRef.current = currentIds
+      }
     })
-  }, [editor, onChange])
+  }, [editor, onChange, onDeleteSubPage])
 
   const handleClickOutsideEditor = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
