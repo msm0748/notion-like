@@ -21,7 +21,7 @@ import { editorSchema } from '../conf/editor-schema'
 interface EditorContentProps {
   initialContent?: Block[]
   onChange?: (content: Block[]) => void
-  onCreateSubPage?: () => void
+  onCreateSubPage?: () => Promise<string | undefined>
 }
 
 export interface EditorContentHandle {
@@ -118,8 +118,30 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
               if (onCreateSubPage) {
                 items.push({
                   title: '하위 페이지',
-                  onItemClick: () => {
-                    onCreateSubPage()
+                  onItemClick: async () => {
+                    const pageId = await onCreateSubPage()
+                    if (!pageId) return
+
+                    const currentBlock = editor.getTextCursorPosition().block
+                    const isCurrentEmpty =
+                      Array.isArray(currentBlock.content) &&
+                      (currentBlock.content.length === 0 ||
+                        (currentBlock.content.length === 1 &&
+                          currentBlock.content[0].type === 'text' &&
+                          currentBlock.content[0].text === '/'))
+
+                    if (isCurrentEmpty) {
+                      editor.updateBlock(currentBlock, {
+                        type: 'subPageLink',
+                        props: { pageId },
+                      })
+                    } else {
+                      editor.insertBlocks(
+                        [{ type: 'subPageLink', props: { pageId } }],
+                        currentBlock,
+                        'after',
+                      )
+                    }
                   },
                   aliases: ['sub-page', 'subpage', 'page', '하위', '페이지'],
                   group: '고급',

@@ -9,6 +9,7 @@ import {
   parseDefaultProps,
 } from '@blocknote/core'
 import type { HeadingOptions } from '@blocknote/core'
+import { subPageLinkBlock } from '../ui/sub-page-link-block'
 
 const HEADING_LEVELS = [1, 2, 3] as const
 
@@ -118,5 +119,6 @@ export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     heading: createHeadingBlockSpecShifted(),
+    subPageLink: subPageLinkBlock(),
   },
 })

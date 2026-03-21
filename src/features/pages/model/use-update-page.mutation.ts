@@ -13,6 +13,13 @@ export const useUpdatePageMutation = () => {
         { queryKey: pagesKeys.lists() },
         (old) => old?.map((p) => (p.id === data.id ? { ...p, title: data.title } : p)),
       );
+      // children 캐시 내 해당 페이지 title도 업데이트 (하위 페이지 제목 반영)
+      if (data.parentId) {
+        queryClient.setQueriesData<PageDto[]>(
+          { queryKey: pagesKeys.children(data.parentId) },
+          (old) => old?.map((p) => (p.id === data.id ? { ...p, title: data.title } : p)),
+        );
+      }
       // detail 캐시 직접 업데이트
       queryClient.setQueryData(pagesKeys.detail(data.id), data);
     },
