@@ -165,10 +165,17 @@ export const EditorContent = forwardRef<
             { transform: 'translateY(-18px)' },
           '& :where(.bn-side-menu)[data-block-type="heading"][data-level="2"]':
             { transform: 'translateY(-4px)' },
-          /* codeBlock(content:none) 컨테이너가 inline-block으로 축소되는 문제 수정 */
+          /* codeBlock 커스텀 스타일: @blocknote/core 기본 스타일 초기화 */
           '& .bn-block-content[data-content-type="codeBlock"]': {
             display: 'block',
             width: '100%',
+            backgroundColor: 'transparent !important',
+            borderRadius: '0 !important',
+            color: 'inherit !important',
+            padding: '0 !important',
+          },
+          '& .bn-block-content[data-content-type="codeBlock"] > pre': {
+            display: 'none !important',
           },
         }}
       >

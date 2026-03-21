@@ -129,8 +129,10 @@ function CodeBlockRender({
   )
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 모든 키 이벤트가 BlockNote(ProseMirror)로 버블링되면 중복 처리됨 → 전부 차단
+    e.stopPropagation()
     if (BLOCK_NAV_KEYS.includes(e.key)) {
-      e.stopPropagation()
+      // stopPropagation만으로 충분, 추가 처리 없음
     }
     if (e.key === 'Tab') {
       e.preventDefault()
