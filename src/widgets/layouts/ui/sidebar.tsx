@@ -81,13 +81,6 @@ export function Sidebar() {
     }
   };
 
-  const navLinkSx = {
-    // borderRadius: 'var(--mantine-radius-sm)',
-    // '&:hover': {
-    //   backgroundColor: 'var(--mantine-color-notionGray-2)',
-    // },
-  };
-
   const favoritePageIds = new Set(favoritePages.map((p) => p.id));
 
   return (
@@ -120,7 +113,6 @@ export function Sidebar() {
             />
           }
           onClick={() => setSearchOpened(true)}
-          // sx={navLinkSx}
         />
         <Link
           to="/"
@@ -135,7 +127,6 @@ export function Sidebar() {
               color="var(--mantine-color-notionGray-6)"
             />
           }
-          sx={navLinkSx}
         />
       </Box>
 
@@ -175,14 +166,7 @@ export function Sidebar() {
         mih={0}
         mt="md"
       >
-        <Box
-          onClick={handleAddPage}
-          style={{ width: '100%', cursor: 'pointer' }}
-          // sx={{
-          //   borderRadius: 'var(--mantine-radius-sm)',
-          //   '&:hover': { backgroundColor: 'var(--mantine-color-notionGray-2)' },
-          // }}
-        >
+        <Box sx={{ width: '100%' }}>
           <Group justify="space-between" px="xs" py="6px" wrap="nowrap">
             <Text component="span" style={sectionLabelSx}>
               Private
@@ -193,7 +177,8 @@ export function Sidebar() {
               color="gray"
               size="sm"
               aria-label="새 페이지"
-              style={{ opacity: 0.7 }}
+              sx={{ opacity: 0.7 }}
+              onClick={handleAddPage}
             >
               <Plus
                 style={{ width: rem(14), height: rem(14) }}
@@ -239,7 +224,6 @@ export function Sidebar() {
               color="var(--mantine-color-notionGray-6)"
             />
           }
-          sx={navLinkSx}
         />
       </Box>
 

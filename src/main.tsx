@@ -1,4 +1,6 @@
 import '@mantine/core/styles.css';
+import '@blocknote/core/fonts/inter.css';
+import '@blocknote/mantine/style.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';

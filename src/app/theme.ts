@@ -1,4 +1,12 @@
-import { colorsTuple, createTheme, virtualColor } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  colorsTuple,
+  createTheme,
+  Menu,
+  NavLink,
+  virtualColor,
+} from '@mantine/core';
 
 /**
  * Notion 디자인 시스템 기반 Mantine 테마
@@ -188,23 +196,30 @@ export const theme = createTheme({
   },
 
   components: {
-    Button: {
+    Button: Button.extend({
       defaultProps: {
         variant: 'subtle',
         radius: 'md',
       },
-    },
-    LavLink: {
-      styles: {
-        color: 'red',
-      },
-    },
-    ActionIcon: {
+    }),
+    ActionIcon: ActionIcon.extend({
       defaultProps: {
         radius: 'md',
       },
-    },
-    Menu: {
+    }),
+    NavLink: NavLink.extend({
+      styles: {
+        root: {
+          '&[data-status=active]': {
+            backgroundColor: 'var(--mantine-color-notionGray-3)',
+          },
+          '&:hover': {
+            backgroundColor: 'var(--mantine-color-notionGray-2)',
+          },
+        },
+      },
+    }),
+    Menu: Menu.extend({
       defaultProps: {
         radius: 'md',
         shadow: 'md',
@@ -214,6 +229,6 @@ export const theme = createTheme({
           border: '1px solid var(--mantine-color-default-border)',
         },
       },
-    },
+    }),
   },
 });

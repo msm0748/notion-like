@@ -1,10 +1,8 @@
-import '@blocknote/core/fonts/inter.css'
-import '@blocknote/mantine/style.css'
-import { Box } from '@mantine/core'
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { FileText } from 'lucide-react'
-import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant'
-import { BlockNoteView } from '@blocknote/mantine'
+import { Box } from '@mantine/core';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { FileText } from 'lucide-react';
+import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
+import { BlockNoteView } from '@blocknote/mantine';
 import {
   AddBlockButton,
   DragHandleButton,
@@ -13,80 +11,82 @@ import {
   useCreateBlockNote,
   SuggestionMenuController,
   getDefaultReactSlashMenuItems,
-} from '@blocknote/react'
-import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-types'
-import { editorSchema, type EditorBlock } from '../conf/editor-schema'
+} from '@blocknote/react';
+import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-types';
+import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
 function collectSubPageIds(blocks: EditorBlock[]): Set<string> {
-  const ids = new Set<string>()
+  const ids = new Set<string>();
   for (const block of blocks) {
     if (block.type === 'subPageLink' && block.props.pageId) {
-      ids.add(block.props.pageId)
+      ids.add(block.props.pageId);
     }
     if (block.children?.length) {
       for (const id of collectSubPageIds(block.children)) {
-        ids.add(id)
+        ids.add(id);
       }
     }
   }
-  return ids
+  return ids;
 }
 
 interface EditorContentProps {
-  initialContent?: EditorBlock[]
-  onChange?: (content: EditorBlock[]) => void
-  onCreateSubPage?: () => Promise<string | undefined>
-  onDeleteSubPage?: (pageId: string) => void
+  initialContent?: EditorBlock[];
+  onChange?: (content: EditorBlock[]) => void;
+  onCreateSubPage?: () => Promise<string | undefined>;
+  onDeleteSubPage?: (pageId: string) => void;
 }
 
 export interface EditorContentHandle {
-  focusStart: () => void
+  focusStart: () => void;
 }
 
-export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>(
-  ({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
+export const EditorContent = forwardRef<
+  EditorContentHandle,
+  EditorContentProps
+>(({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
   const editor = useCreateBlockNote({
     schema: editorSchema,
     initialContent,
-  })
+  });
 
   useImperativeHandle(ref, () => ({
     focusStart: () => {
-      const firstBlock = editor.document[0]
-      if (!firstBlock) return
-      editor.focus()
-      editor.setTextCursorPosition(firstBlock, 'start')
+      const firstBlock = editor.document[0];
+      if (!firstBlock) return;
+      editor.focus();
+      editor.setTextCursorPosition(firstBlock, 'start');
     },
-  }))
+  }));
 
   const prevSubPageIdsRef = useRef<Set<string>>(
     initialContent ? collectSubPageIds(initialContent) : new Set(),
-  )
+  );
 
   useEffect(() => {
     return editor.onChange(() => {
-      const doc = editor.document as EditorBlock[]
-      onChange?.(doc)
+      const doc = editor.document as EditorBlock[];
+      onChange?.(doc);
 
       if (onDeleteSubPage) {
-        const currentIds = collectSubPageIds(doc)
+        const currentIds = collectSubPageIds(doc);
         for (const id of prevSubPageIdsRef.current) {
           if (!currentIds.has(id)) {
-            onDeleteSubPage(id)
+            onDeleteSubPage(id);
           }
         }
-        prevSubPageIdsRef.current = currentIds
+        prevSubPageIdsRef.current = currentIds;
       }
-    })
-  }, [editor, onChange, onDeleteSubPage])
+    });
+  }, [editor, onChange, onDeleteSubPage]);
 
   const handleClickOutsideEditor = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      const lastBlock = editor.document[editor.document.length - 1]
-      editor.focus()
-      editor.setTextCursorPosition(lastBlock, 'end')
+      const lastBlock = editor.document[editor.document.length - 1];
+      editor.focus();
+      editor.setTextCursorPosition(lastBlock, 'end');
     }
-  }
+  };
 
   return (
     <Box
@@ -142,45 +142,45 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
                     '제목 5',
                     '제목 6',
                   ].includes(item.title),
-              )
+              );
 
               if (onCreateSubPage) {
                 items.push({
                   title: '하위 페이지',
                   onItemClick: async () => {
-                    const pageId = await onCreateSubPage()
-                    if (!pageId) return
+                    const pageId = await onCreateSubPage();
+                    if (!pageId) return;
 
-                    const currentBlock = editor.getTextCursorPosition().block
+                    const currentBlock = editor.getTextCursorPosition().block;
                     const isCurrentEmpty =
                       Array.isArray(currentBlock.content) &&
                       (currentBlock.content.length === 0 ||
                         (currentBlock.content.length === 1 &&
                           currentBlock.content[0].type === 'text' &&
-                          currentBlock.content[0].text === '/'))
+                          currentBlock.content[0].text === '/'));
 
                     if (isCurrentEmpty) {
                       editor.updateBlock(currentBlock, {
                         type: 'subPageLink',
                         props: { pageId },
-                      })
+                      });
                     } else {
                       editor.insertBlocks(
                         [{ type: 'subPageLink', props: { pageId } }],
                         currentBlock,
                         'after',
-                      )
+                      );
                     }
                   },
                   aliases: ['sub-page', 'subpage', 'page', '하위', '페이지'],
                   group: '고급',
                   icon: <FileText size={18} />,
                   subtext: '하위 페이지를 생성합니다',
-                })
+                });
               }
 
-              if (!query) return items
-              const lowered = query.toLowerCase()
+              if (!query) return items;
+              const lowered = query.toLowerCase();
               return items.filter(
                 (item) =>
                   item.title.toLowerCase().includes(lowered) ||
@@ -188,7 +188,7 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
                   item.aliases?.some((alias) =>
                     alias.toLowerCase().includes(lowered),
                   ),
-              )
+              );
             }}
           />
           <SideMenuController
@@ -209,11 +209,11 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
       <Box
         sx={{ minHeight: '40vh' }}
         onClick={() => {
-          const lastBlock = editor.document[editor.document.length - 1]
-          editor.focus()
-          editor.setTextCursorPosition(lastBlock, 'end')
+          const lastBlock = editor.document[editor.document.length - 1];
+          editor.focus();
+          editor.setTextCursorPosition(lastBlock, 'end');
         }}
       />
     </Box>
-  )
-})
+  );
+});

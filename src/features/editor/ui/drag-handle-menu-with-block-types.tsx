@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { editorHasBlockWithType } from '@blocknote/core'
-import { SideMenuExtension } from '@blocknote/core/extensions'
+import { editorHasBlockWithType } from '@blocknote/core';
+import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
   BlockColorsItem,
   DragHandleMenu,
@@ -9,27 +8,27 @@ import {
   useBlockNoteEditor,
   useComponentsContext,
   useExtensionState,
-} from '@blocknote/react'
-import { useMemo } from 'react'
+} from '@blocknote/react';
+import { useMemo } from 'react';
 
 /**
  * 드래그 핸들(⠿) 메뉴에 블록 타입 변경(Paragraph, Heading 1~6, Quote, 목록 등) 항목을 추가합니다.
  * 공식 Components.Generic.Menu.Item을 사용해 메뉴 클릭 시 자동으로 닫히도록 합니다.
  */
 function BlockTypeMenuItems() {
-  const editor = useBlockNoteEditor()
-  const Components = useComponentsContext()!
+  const editor = useBlockNoteEditor();
+  const Components = useComponentsContext()!;
   const block = useExtensionState(SideMenuExtension, {
     editor,
     selector: (state) => state?.block,
-  })
+  });
 
   const items = useMemo(() => {
-    if (!block || !editor) return []
-    const dict = editor.dictionary
+    if (!block || !editor) return [];
+    const dict = editor.dictionary;
     return blockTypeSelectItems(dict).filter((item) => {
       if (item.type === 'heading' && (item.props?.level as number) > 3) {
-        return false
+        return false;
       }
       return editorHasBlockWithType(
         editor,
@@ -37,36 +36,36 @@ function BlockTypeMenuItems() {
         Object.fromEntries(
           Object.entries(item.props ?? {}).map(([k, v]) => [k, typeof v]),
         ) as Record<string, 'string' | 'number' | 'boolean'>,
-      )
-    })
-  }, [block, editor])
+      );
+    });
+  }, [block, editor]);
 
-  if (!block || !editor) return null
+  if (!block || !editor) return null;
 
   if (block.type === 'subPageLink') {
-    return <RemoveBlockItem>Delete</RemoveBlockItem>
+    return <RemoveBlockItem>Delete</RemoveBlockItem>;
   }
 
   return (
     <>
       {items.map((item) => {
-        const Icon = item.icon
+        const Icon = item.icon;
         return (
           <Components.Generic.Menu.Item
             key={`${item.type}-${JSON.stringify(item.props ?? {})}`}
             className="bn-menu-item"
             onClick={() => {
-              editor.focus()
+              editor.focus();
               editor.updateBlock(block, {
                 type: item.type as any,
                 props: (item.props as any) ?? {},
-              })
+              });
             }}
           >
             <Icon size={16} style={{ flexShrink: 0 }} />
             {item.name}
           </Components.Generic.Menu.Item>
-        )
+        );
       })}
       <div
         role="separator"
@@ -79,7 +78,7 @@ function BlockTypeMenuItems() {
       <RemoveBlockItem>Delete</RemoveBlockItem>
       <BlockColorsItem>Colors</BlockColorsItem>
     </>
-  )
+  );
 }
 
 /**
@@ -87,12 +86,12 @@ function BlockTypeMenuItems() {
  * BlockNoteView의 SideMenuController와 함께 사용합니다.
  */
 export function DragHandleMenuWithBlockTypes(props: {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }) {
   return (
     <DragHandleMenu>
       <BlockTypeMenuItems />
       {props.children}
     </DragHandleMenu>
-  )
+  );
 }

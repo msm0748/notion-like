@@ -50,11 +50,17 @@ export function PageRow({
           minWidth: 0,
           borderRadius: 'var(--mantine-radius-sm)',
           position: 'relative',
+          backgroundColor: isActive
+            ? 'var(--mantine-color-notionGray-3)'
+            : 'none',
           '&:hover .page-actions': {
             opacity: 1,
           },
           '&:hover .page-toggle': {
             opacity: 1,
+          },
+          '&:hover': {
+            backgroundColor: 'var(--mantine-color-notionGray-2)',
           },
         }}
       >
@@ -98,6 +104,7 @@ export function PageRow({
             <Link
               to="/page/$pageId"
               params={{ pageId: page.id }}
+              variant="subtle"
               label={
                 <Group wrap="nowrap" gap={6} style={{ minWidth: 0 }}>
                   <FileText
@@ -113,6 +120,11 @@ export function PageRow({
                   </Text>
                 </Group>
               }
+              sx={{
+                '&[data-status=active]': {
+                  backgroundColor: 'transparent',
+                },
+              }}
             />
           </Box>
 
