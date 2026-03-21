@@ -106,13 +106,19 @@ const createCodeBlockConfig = createBlockConfig(
     }) as const,
 )
 
+interface CodeBlockEditor {
+  updateBlock(
+    block: { id: string; props: { code: string; language: string } },
+    update: { props?: Partial<{ code: string; language: string }> },
+  ): void
+}
+
 function CodeBlockRender({
   block,
   editor,
 }: {
   block: { id: string; props: { code: string; language: string } }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  editor: any
+  editor: CodeBlockEditor
 }) {
   const [copied, setCopied] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)

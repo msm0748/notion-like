@@ -16,13 +16,22 @@ import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-type
 import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
+type RawContentNode = { type: string; text?: string }
+
+type RawBlock = {
+  type: string
+  content?: unknown
+  props?: Record<string, unknown>
+  children?: RawBlock[]
+  [key: string]: unknown
+}
+
 // 구 버전 codeBlock(인라인 content)을 새 형식(code prop)으로 마이그레이션
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function migrateBlocks(blocks: any[]): any[] {
+function migrateBlocks(blocks: RawBlock[]): RawBlock[] {
   return blocks.map((block) => {
     if (block.type === 'codeBlock' && Array.isArray(block.content)) {
-      const code = block.content
-        .map((node: any) => {
+      const code = (block.content as RawContentNode[])
+        .map((node) => {
           if (node.type === 'text') return node.text ?? '';
           if (node.type === 'hardBreak') return '\n';
           return '';
@@ -34,7 +43,7 @@ function migrateBlocks(blocks: any[]): any[] {
         props: {
           ...block.props,
           code,
-          language: block.props?.language ?? 'plaintext',
+          language: (block.props?.language as string | undefined) ?? 'plaintext',
         },
       };
     }
@@ -76,7 +85,7 @@ export const EditorContent = forwardRef<
   EditorContentProps
 >(({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
   const migratedContent = initialContent
-    ? migrateBlocks(initialContent)
+    ? (migrateBlocks(initialContent) as EditorBlock[])
     : undefined;
 
   const editor = useCreateBlockNote({
