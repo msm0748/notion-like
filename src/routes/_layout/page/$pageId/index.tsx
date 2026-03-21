@@ -1,13 +1,21 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { TopNav } from '@/widgets/layouts';
+import { TopNav } from './-ui/top-nav';
 import { Box, Title } from '@mantine/core';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
-import { useUpdatePageMutation, useCreatePageMutation, useDeletePageMutation } from '@/features/pages';
-import { EditorContent, type EditorContentHandle, type EditorBlock } from '@/features/editor';
+import {
+  useUpdatePageMutation,
+  useCreatePageMutation,
+  useDeletePageMutation,
+} from '@/features/pages';
+import {
+  EditorContent,
+  type EditorContentHandle,
+  type EditorBlock,
+} from '@/features/editor';
 
 export const Route = createFileRoute('/_layout/page/$pageId/')({
   component: PageEditor,
@@ -91,11 +99,16 @@ function PageEditor() {
     };
   }, [savePage]);
 
-  const handleDeleteSubPage = useCallback((subPageId: string) => {
-    deletePage(subPageId);
-  }, [deletePage]);
+  const handleDeleteSubPage = useCallback(
+    (subPageId: string) => {
+      deletePage(subPageId);
+    },
+    [deletePage],
+  );
 
-  const handleCreateSubPage = useCallback(async (): Promise<string | undefined> => {
+  const handleCreateSubPage = useCallback(async (): Promise<
+    string | undefined
+  > => {
     try {
       const { id } = await createPage(pageId);
       navigate({ to: '/page/$pageId', params: { pageId: id } });
@@ -112,7 +125,7 @@ function PageEditor() {
 
   return (
     <Box h="100%" display="flex" sx={{ flexDirection: 'column' }}>
-      <TopNav />
+      <TopNav pageId={pageId} />
       <Box
         sx={{
           cursor: 'text',
