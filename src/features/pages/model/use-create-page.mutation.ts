@@ -4,8 +4,8 @@ import { pagesKeys } from '@/entities/pages'
 
 export const useCreatePageMutation = () => {
   const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (parentId?: string) => createPage(parentId),
+  return useMutation<{ id: string }, Error, string | void>({
+    mutationFn: (parentId) => createPage(parentId ?? undefined),
     onSuccess: (_data, parentId) => {
       queryClient.invalidateQueries({ queryKey: pagesKeys.lists() })
       if (parentId) {
