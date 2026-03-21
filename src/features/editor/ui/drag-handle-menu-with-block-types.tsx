@@ -93,6 +93,7 @@ function BlockTypeMenuItems() {
             const Icon = item.icon;
             return (
               <Box
+                key={`${item.type}-${JSON.stringify(item.props ?? {})}`}
                 sx={{
                   '& .bn-menu-item': {
                     height: 'auto',
@@ -101,7 +102,6 @@ function BlockTypeMenuItems() {
                 }}
               >
                 <Components.Generic.Menu.Item
-                  key={`${item.type}-${JSON.stringify(item.props ?? {})}`}
                   className="bn-menu-item"
                   onClick={() => {
                     editor.focus();

@@ -81,6 +81,31 @@ export const EditorContent = forwardRef<
     });
   }, [editor, onChange, onDeleteSubPage]);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === '`') {
+      const block = editor.getTextCursorPosition().block;
+      const content = block.content;
+      if (
+        block.type === 'paragraph' &&
+        Array.isArray(content) &&
+        content.length === 1 &&
+        content[0].type === 'text' &&
+        content[0].text === '``'
+      ) {
+        e.preventDefault();
+        const blockIndex = editor.document.findIndex((b) => b.id === block.id);
+        editor.replaceBlocks([block], [{ type: 'codeBlock', content: '' }]);
+        requestAnimationFrame(() => {
+          const newBlock = editor.document[blockIndex];
+          if (newBlock) {
+            editor.focus();
+            editor.setTextCursorPosition(newBlock, 'start');
+          }
+        });
+      }
+    }
+  };
+
   const handleClickOutsideEditor = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       const lastBlock = editor.document[editor.document.length - 1];
@@ -129,6 +154,7 @@ export const EditorContent = forwardRef<
           theme="light"
           sideMenu={false}
           slashMenu={false}
+          onKeyDown={handleKeyDown}
         >
           <SuggestionMenuController
             triggerCharacter={'/'}
