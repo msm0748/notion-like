@@ -60,7 +60,6 @@ export function SlashMenu({
               <Box
                 key={item.index}
                 onClick={() => {
-                  item.onItemClick();
                   onItemClick?.(item);
                 }}
                 sx={{
