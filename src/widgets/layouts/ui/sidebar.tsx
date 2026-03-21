@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   ScrollArea,
@@ -6,6 +7,7 @@ import {
   ActionIcon,
   Menu,
   rem,
+  NavLink,
 } from '@mantine/core';
 import {
   Search,
@@ -25,6 +27,7 @@ import {
   useCreatePageMutation,
   useDeletePageMutation,
   useToggleFavoriteMutation,
+  SearchModal,
 } from '@/features/pages';
 import { DEFAULT_TITLE } from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
@@ -32,6 +35,7 @@ import { pagesQueryOptions } from '@/entities/pages';
 export function Sidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchOpened, setSearchOpened] = useState(false);
 
   const { data: pages = [] } = useQuery({
     ...pagesQueryOptions.list(),
@@ -216,8 +220,7 @@ export function Sidebar() {
 
       {/* Main Nav */}
       <Box display="flex" sx={{ flexDirection: 'column', gap: '2px' }}>
-        <Link
-          to="/"
+        <NavLink
           label={
             <Text size="sm" fw={400} c="var(--mantine-color-notionGray-7)">
               Search
@@ -229,6 +232,7 @@ export function Sidebar() {
               color="var(--mantine-color-notionGray-6)"
             />
           }
+          onClick={() => setSearchOpened(true)}
           sx={navLinkSx}
         />
         <Link
@@ -335,6 +339,11 @@ export function Sidebar() {
           sx={navLinkSx}
         />
       </Box>
+
+      <SearchModal
+        opened={searchOpened}
+        onClose={() => setSearchOpened(false)}
+      />
     </Box>
   );
 }

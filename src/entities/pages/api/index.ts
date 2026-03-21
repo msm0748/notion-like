@@ -84,3 +84,17 @@ export const removeFavorite = async (pageId: string): Promise<void> => {
     .eq('pageId', pageId);
   if (error) throw new Error(error.message);
 };
+
+export const searchPages = async (query: string): Promise<PageDto[]> => {
+  const userId = await getCurrentUserId();
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('userId', userId)
+    .eq('isTrashed', false)
+    .ilike('title', `%${query}%`)
+    .order('updatedAt', { ascending: false })
+    .limit(20);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PageDto[];
+};
