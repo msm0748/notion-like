@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { editorHasBlockWithType } from '@blocknote/core';
 import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
@@ -10,11 +11,23 @@ import {
   useExtensionState,
 } from '@blocknote/react';
 import { useMemo } from 'react';
+import { Box, Text } from '@mantine/core';
 
-/**
- * 드래그 핸들(⠿) 메뉴에 블록 타입 변경(Paragraph, Heading 1~6, Quote, 목록 등) 항목을 추가합니다.
- * 공식 Components.Generic.Menu.Item을 사용해 메뉴 클릭 시 자동으로 닫히도록 합니다.
- */
+const GROUP_ORDER = ['Headings', 'Basic blocks', 'Advanced', 'Media'];
+
+function getGroup(type: string): string {
+  if (type === 'heading') return 'Headings';
+  if (type === 'table') return 'Advanced';
+  if (
+    type === 'image' ||
+    type === 'video' ||
+    type === 'audio' ||
+    type === 'file'
+  )
+    return 'Media';
+  return 'Basic blocks';
+}
+
 function BlockTypeMenuItems() {
   const editor = useBlockNoteEditor();
   const Components = useComponentsContext()!;
@@ -23,13 +36,14 @@ function BlockTypeMenuItems() {
     selector: (state) => state?.block,
   });
 
-  const items = useMemo(() => {
+  const grouped = useMemo(() => {
     if (!block || !editor) return [];
     const dict = editor.dictionary;
-    return blockTypeSelectItems(dict).filter((item) => {
-      if (item.type === 'heading' && (item.props?.level as number) > 3) {
+    const items = blockTypeSelectItems(dict).filter((item) => {
+      if (item.type === 'heading' && (item.props?.level as number) > 3)
         return false;
-      }
+      if (item.type === 'heading' && (item.props as any)?.isToggleable)
+        return false;
       return editorHasBlockWithType(
         editor,
         item.type,
@@ -38,6 +52,18 @@ function BlockTypeMenuItems() {
         ) as Record<string, 'string' | 'number' | 'boolean'>,
       );
     });
+
+    const map = new Map<string, typeof items>();
+    for (const item of items) {
+      const g = getGroup(item.type);
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(item);
+    }
+
+    return GROUP_ORDER.filter((g) => map.has(g)).map((g) => ({
+      name: g,
+      items: map.get(g)!,
+    }));
   }, [block, editor]);
 
   if (!block || !editor) return null;
@@ -48,25 +74,78 @@ function BlockTypeMenuItems() {
 
   return (
     <>
-      {items.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Components.Generic.Menu.Item
-            key={`${item.type}-${JSON.stringify(item.props ?? {})}`}
-            className="bn-menu-item"
-            onClick={() => {
-              editor.focus();
-              editor.updateBlock(block, {
-                type: item.type as any,
-                props: (item.props as any) ?? {},
-              });
+      {grouped.map((group) => (
+        <Fragment key={group.name}>
+          {/* Group label */}
+          <Text
+            sx={{
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--mantine-color-dimmed)',
+              padding: '8px 12px 4px',
+              userSelect: 'none',
             }}
           >
-            <Icon size={16} style={{ flexShrink: 0 }} />
-            {item.name}
-          </Components.Generic.Menu.Item>
-        );
-      })}
+            {group.name}
+          </Text>
+
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Box
+                sx={{
+                  '& .bn-menu-item': {
+                    height: 'auto',
+                    padding: '4px 8px',
+                  },
+                }}
+              >
+                <Components.Generic.Menu.Item
+                  key={`${item.type}-${JSON.stringify(item.props ?? {})}`}
+                  className="bn-menu-item"
+                  onClick={() => {
+                    editor.focus();
+                    editor.updateBlock(block, {
+                      type: item.type as any,
+                      props: (item.props as any) ?? {},
+                    });
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      width: '100%',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        flexShrink: 0,
+                        backgroundColor: 'var(--mantine-color-body)',
+                        border: '1px solid var(--mantine-color-gray-3)',
+                        borderRadius: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--mantine-color-dark-6)',
+                      }}
+                    >
+                      <Icon size={20} />
+                    </Box>
+                    <Text size="sm" fw={500}>
+                      {item.name}
+                    </Text>
+                  </Box>
+                </Components.Generic.Menu.Item>
+              </Box>
+            );
+          })}
+        </Fragment>
+      ))}
+
       <div
         role="separator"
         style={{
@@ -81,10 +160,6 @@ function BlockTypeMenuItems() {
   );
 }
 
-/**
- * 블록 타입 변경 + Delete, Colors가 포함된 커스텀 드래그 핸들 메뉴 컴포넌트.
- * BlockNoteView의 SideMenuController와 함께 사용합니다.
- */
 export function DragHandleMenuWithBlockTypes(props: {
   children?: React.ReactNode;
 }) {

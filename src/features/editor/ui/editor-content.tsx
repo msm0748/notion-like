@@ -13,6 +13,7 @@ import {
   getDefaultReactSlashMenuItems,
 } from '@blocknote/react';
 import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-types';
+import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
 function collectSubPageIds(blocks: EditorBlock[]): Set<string> {
@@ -131,6 +132,7 @@ export const EditorContent = forwardRef<
         >
           <SuggestionMenuController
             triggerCharacter={'/'}
+            suggestionMenuComponent={SlashMenu}
             getItems={async (query: string) => {
               const items = getDefaultReactSlashMenuItems(editor).filter(
                 (item) =>

@@ -27,7 +27,7 @@ export function SearchModal({ opened, onClose }: SearchModalProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 300);
+    }, 100);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -88,10 +88,7 @@ export function SearchModal({ opened, onClose }: SearchModalProps) {
           }}
         />
 
-        <Box
-          mah={400}
-          style={{ overflowY: 'auto' }}
-        >
+        <Box mah={400} style={{ overflowY: 'auto' }}>
           {debouncedQuery.length === 0 ? (
             <Box py="xl" style={{ textAlign: 'center' }}>
               <Text size="sm" c="var(--mantine-color-notionGray-5)">
