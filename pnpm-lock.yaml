@@ -41,15 +41,9 @@ importers:
       '@types/lodash':
         specifier: ^4.17.24
         version: 4.17.24
-      highlight.js:
-        specifier: ^11.11.1
-        version: 11.11.1
       lodash:
         specifier: ^4.17.23
         version: 4.17.23
-      lowlight:
-        specifier: ^3.3.0
-        version: 3.3.0
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
@@ -4185,7 +4179,8 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
-  highlight.js@11.11.1: {}
+  highlight.js@11.11.1:
+    optional: true
 
   hoist-non-react-statics@3.3.2:
     dependencies:
@@ -4361,6 +4356,7 @@ snapshots:
       '@types/hast': 3.0.4
       devlop: 1.1.0
       highlight.js: 11.11.1
+    optional: true
 
   lru-cache@5.1.1:
     dependencies:
