@@ -7,6 +7,7 @@ import { pagesQueryOptions } from '@/entities/pages';
 import {
   useRestorePageMutation,
   usePermanentDeleteMutation,
+  usePermanentDeleteAllMutation,
 } from '@/features/pages';
 import { DEFAULT_TITLE } from '@/shared/conf/constant';
 import type { PageDto } from '@/entities/pages/type';
@@ -22,13 +23,20 @@ function TrashPage() {
   );
   const { mutate: restorePage } = useRestorePageMutation();
   const { mutate: permanentlyDelete } = usePermanentDeleteMutation();
+  const { mutate: permanentlyDeleteAll } = usePermanentDeleteAllMutation();
   const [deleteTarget, setDeleteTarget] = useState<PageDto | null>(null);
+  const [deleteAllConfirm, setDeleteAllConfirm] = useState(false);
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       permanentlyDelete(deleteTarget.id);
       setDeleteTarget(null);
     }
+  };
+
+  const handleConfirmDeleteAll = () => {
+    permanentlyDeleteAll();
+    setDeleteAllConfirm(false);
   };
 
   return (
@@ -41,20 +49,32 @@ function TrashPage() {
           width: '100%',
         }}
       >
-        <Group gap={10} mb={32}>
-          <Trash2
-            style={{ width: rem(24), height: rem(24) }}
-            color="var(--mantine-color-notionGray-6)"
-          />
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: 700,
-              color: 'var(--mantine-color-notionGray-7)',
-            }}
-          >
-            휴지통
-          </Text>
+        <Group justify="space-between" mb={32}>
+          <Group gap={10}>
+            <Trash2
+              style={{ width: rem(24), height: rem(24) }}
+              color="var(--mantine-color-notionGray-6)"
+            />
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: 'var(--mantine-color-notionGray-7)',
+              }}
+            >
+              휴지통
+            </Text>
+          </Group>
+          {trashedPages.length > 0 && (
+            <Button
+              variant="subtle"
+              color="red"
+              size="xs"
+              onClick={() => setDeleteAllConfirm(true)}
+            >
+              전체 삭제
+            </Button>
+          )}
         </Group>
 
         {isLoading ? null : trashedPages.length === 0 ? (
@@ -109,6 +129,26 @@ function TrashPage() {
           </Button>
           <Button color="red" onClick={handleConfirmDelete}>
             삭제
+          </Button>
+        </Group>
+      </Modal>
+
+      <Modal
+        opened={deleteAllConfirm}
+        onClose={() => setDeleteAllConfirm(false)}
+        title="전체 영구 삭제"
+        centered
+        size="sm"
+      >
+        <Text size="sm" mb="lg">
+          휴지통의 모든 페이지({trashedPages.length}개)를 영구적으로 삭제할까요? 이 작업은 되돌릴 수 없어요.
+        </Text>
+        <Group justify="flex-end" gap="xs">
+          <Button variant="default" onClick={() => setDeleteAllConfirm(false)}>
+            취소
+          </Button>
+          <Button color="red" onClick={handleConfirmDeleteAll}>
+            전체 삭제
           </Button>
         </Group>
       </Modal>

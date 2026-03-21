@@ -51,3 +51,13 @@ export const permanentlyDeletePage = async (pageId: string): Promise<void> => {
   const { error } = await supabase.from('pages').delete().eq('id', pageId);
   if (error) throw new Error(error.message);
 };
+
+export const permanentlyDeleteAllTrashedPages = async (): Promise<void> => {
+  const userId = await getCurrentUserId();
+  const { error } = await supabase
+    .from('pages')
+    .delete()
+    .eq('userId', userId)
+    .eq('isTrashed', true);
+  if (error) throw new Error(error.message);
+};
