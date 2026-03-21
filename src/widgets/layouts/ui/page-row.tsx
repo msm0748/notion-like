@@ -67,7 +67,7 @@ export function PageRow({
         <Group
           wrap="nowrap"
           gap={0}
-          style={{ width: '100%', minWidth: 0, paddingLeft: depth * 16 }}
+          sx={{ width: '100%', minWidth: 0, paddingLeft: depth * 16 }}
           align="center"
         >
           {/* Expand/Collapse toggle */}
