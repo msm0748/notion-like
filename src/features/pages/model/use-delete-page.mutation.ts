@@ -7,7 +7,7 @@ export const useDeletePageMutation = () => {
   return useMutation({
     mutationFn: (pageId: string) => deletePage(pageId),
     onSuccess: (_, pageId) => {
-      queryClient.invalidateQueries({ queryKey: pagesKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: pagesKeys.all });
       queryClient.invalidateQueries({ queryKey: pagesKeys.detail(pageId) });
     },
   });

@@ -37,6 +37,7 @@ export const getPages = async (params?: {
     .from('pages')
     .select('*')
     .eq('userId', userId)
+    .is('parentId', null)
     .order('updatedAt', { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -95,6 +96,19 @@ export const searchPages = async (query: string): Promise<PageDto[]> => {
     .ilike('title', `%${query}%`)
     .order('updatedAt', { ascending: false })
     .limit(20);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PageDto[];
+};
+
+export const getChildPages = async (parentId: string): Promise<PageDto[]> => {
+  const userId = await getCurrentUserId();
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('userId', userId)
+    .eq('parentId', parentId)
+    .eq('isTrashed', false)
+    .order('updatedAt', { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as PageDto[];
 };

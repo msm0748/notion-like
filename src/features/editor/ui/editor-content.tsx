@@ -3,6 +3,7 @@ import '@blocknote/mantine/style.css'
 import type { Block } from '@blocknote/core'
 import { Box } from '@mantine/core'
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
+import { FileText } from 'lucide-react'
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant'
 import { BlockNoteView } from '@blocknote/mantine'
 import {
@@ -20,6 +21,7 @@ import { editorSchema } from '../conf/editor-schema'
 interface EditorContentProps {
   initialContent?: Block[]
   onChange?: (content: Block[]) => void
+  onCreateSubPage?: () => void
 }
 
 export interface EditorContentHandle {
@@ -27,7 +29,7 @@ export interface EditorContentHandle {
 }
 
 export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>(
-  ({ initialContent, onChange }, ref) => {
+  ({ initialContent, onChange, onCreateSubPage }, ref) => {
   const editor = useCreateBlockNote({
     schema: editorSchema,
     initialContent,
@@ -112,6 +114,20 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
                     '제목 6',
                   ].includes(item.title),
               )
+
+              if (onCreateSubPage) {
+                items.push({
+                  title: '하위 페이지',
+                  onItemClick: () => {
+                    onCreateSubPage()
+                  },
+                  aliases: ['sub-page', 'subpage', 'page', '하위', '페이지'],
+                  group: '고급',
+                  icon: <FileText size={18} />,
+                  subtext: '하위 페이지를 생성합니다',
+                })
+              }
+
               if (!query) return items
               const lowered = query.toLowerCase()
               return items.filter(

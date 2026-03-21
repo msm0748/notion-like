@@ -9,11 +9,11 @@ async function getCurrentUserId(): Promise<string> {
   return userId;
 }
 
-export const createPage = async (): Promise<{ id: string }> => {
+export const createPage = async (parentId?: string): Promise<{ id: string }> => {
   const userId = await getCurrentUserId();
   const { data, error } = await supabase
     .from('pages')
-    .insert({ userId, title: '', content: null })
+    .insert({ userId, title: '', content: null, parentId: parentId ?? null })
     .select('id')
     .single();
   if (error) throw new Error(error.message);

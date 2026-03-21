@@ -1,13 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { TopNav } from '@/widgets/layouts';
-import { Box, Title } from '@mantine/core';
+import { Box, Title, Text, Group, UnstyledButton, rem } from '@mantine/core';
+import { FileText } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import type { Block } from '@blocknote/core';
-import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
+import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X, DEFAULT_TITLE } from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
-import { useUpdatePageMutation } from '@/features/pages';
+import { useUpdatePageMutation, useCreatePageMutation } from '@/features/pages';
 import { EditorContent, type EditorContentHandle } from '@/features/editor';
 
 export const Route = createFileRoute('/_layout/page/$pageId/')({
@@ -16,13 +17,16 @@ export const Route = createFileRoute('/_layout/page/$pageId/')({
 
 function PageEditor() {
   const { pageId } = Route.useParams();
+  const navigate = useNavigate();
   const [isTitleEmpty, setIsTitleEmpty] = useState(true);
   const initialTitleSetRef = useRef(false);
   const { mutate: updatePage } = useUpdatePageMutation();
+  const { mutateAsync: createPage } = useCreatePageMutation();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const editorRef = useRef<EditorContentHandle>(null);
 
   const { data: page } = useQuery(pagesQueryOptions.detail(pageId));
+  const { data: childPages = [] } = useQuery(pagesQueryOptions.children(pageId));
 
   // 최신값을 인자로 받아 debounce — ref를 클로저에 닫지 않아 lint 경고 없음
   const savePage = useMemo(
@@ -89,6 +93,15 @@ function PageEditor() {
     };
   }, [savePage]);
 
+  const handleCreateSubPage = useCallback(async () => {
+    try {
+      const { id } = await createPage(pageId);
+      navigate({ to: '/page/$pageId', params: { pageId: id } });
+    } catch (err) {
+      console.error('하위 페이지 생성 실패:', err);
+    }
+  }, [createPage, pageId, navigate]);
+
   const initialContent = Array.isArray(page?.content)
     ? (page.content as Block[])
     : undefined;
@@ -146,7 +159,63 @@ function PageEditor() {
           ref={editorRef}
           initialContent={initialContent}
           onChange={handleContentChange}
+          onCreateSubPage={handleCreateSubPage}
         />
+      )}
+
+      {/* 하위 페이지 목록 */}
+      {childPages.length > 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: CONTENT_MAX_WIDTH,
+              paddingLeft: CONTENT_PADDING_X,
+              paddingRight: CONTENT_PADDING_X,
+            }}
+            pb="xl"
+          >
+            {childPages.map((child) => (
+              <UnstyledButton
+                key={child.id}
+                onClick={() =>
+                  navigate({ to: '/page/$pageId', params: { pageId: child.id } })
+                }
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  width: '100%',
+                  padding: '6px 8px',
+                  borderRadius: 'var(--mantine-radius-sm)',
+                  '&:hover': {
+                    backgroundColor: 'var(--mantine-color-gray-1)',
+                  },
+                }}
+              >
+                <Group gap={8} wrap="nowrap">
+                  <FileText
+                    style={{
+                      width: rem(18),
+                      height: rem(18),
+                      flexShrink: 0,
+                      color: 'var(--mantine-color-notionGray-6)',
+                    }}
+                  />
+                  <Text size="sm" fw={400}>
+                    {child.title?.trim() || DEFAULT_TITLE}
+                  </Text>
+                </Group>
+              </UnstyledButton>
+            ))}
+          </Box>
+        </Box>
       )}
     </Box>
   );

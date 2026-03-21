@@ -60,6 +60,16 @@ export function Sidebar() {
     }
   };
 
+  const handleCreateSubPage = async (parentId: string) => {
+    if (!user) return;
+    try {
+      const { id } = await createPage(parentId);
+      navigate({ to: '/page/$pageId', params: { pageId: id } });
+    } catch (err) {
+      console.error('하위 페이지 생성 실패:', err);
+    }
+  };
+
   const handleDeletePage = async (id: string) => {
     try {
       await deletePage(id);
@@ -150,6 +160,7 @@ export function Sidebar() {
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
+                onCreateSubPage={handleCreateSubPage}
               />
             ))}
           </Box>
@@ -206,6 +217,7 @@ export function Sidebar() {
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
+                onCreateSubPage={handleCreateSubPage}
               />
             ))}
           </Box>
