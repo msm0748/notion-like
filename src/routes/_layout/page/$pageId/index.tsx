@@ -58,6 +58,10 @@ function PageEditor() {
   }, [page]);
 
   useEffect(() => {
+    document.title = page?.title?.trim() || '제목없음';
+  }, [page?.title]);
+
+  useEffect(() => {
     if (!page || !titleRef.current || initialTitleSetRef.current) return;
     const value = page.title ?? '';
     titleRef.current.textContent = value;
