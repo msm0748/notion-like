@@ -31,7 +31,11 @@ function migrateBlocks(blocks: any[]): any[] {
       return {
         ...block,
         content: undefined,
-        props: { ...block.props, code, language: block.props?.language ?? 'plaintext' },
+        props: {
+          ...block.props,
+          code,
+          language: block.props?.language ?? 'plaintext',
+        },
       };
     }
     if (block.children?.length) {
@@ -71,7 +75,9 @@ export const EditorContent = forwardRef<
   EditorContentHandle,
   EditorContentProps
 >(({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
-  const migratedContent = initialContent ? migrateBlocks(initialContent) : undefined;
+  const migratedContent = initialContent
+    ? migrateBlocks(initialContent)
+    : undefined;
 
   const editor = useCreateBlockNote({
     schema: editorSchema,
@@ -120,7 +126,10 @@ export const EditorContent = forwardRef<
         content[0].text === '``'
       ) {
         e.preventDefault();
-        editor.updateBlock(block, { type: 'codeBlock', props: { code: '', language: 'plaintext' } });
+        editor.updateBlock(block, {
+          type: 'codeBlock',
+          props: { code: '', language: 'plaintext' },
+        });
       }
     }
   };

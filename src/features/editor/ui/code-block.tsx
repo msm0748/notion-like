@@ -1,6 +1,6 @@
 import { createBlockConfig } from '@blocknote/core'
 import { createReactBlockSpec } from '@blocknote/react'
-import { Select, ActionIcon } from '@mantine/core'
+import { Select, ActionIcon, useMantineColorScheme } from '@mantine/core'
 import { Copy, Check } from 'lucide-react'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { common, createLowlight } from 'lowlight'
@@ -23,7 +23,7 @@ const SUPPORTED_LANGUAGES = [
   { value: 'markdown', label: 'Markdown' },
 ]
 
-const TOKEN_COLORS: Record<string, string> = {
+const TOKEN_COLORS_DARK: Record<string, string> = {
   'hljs-keyword': '#C792EA',
   'hljs-string': '#C3E88D',
   'hljs-comment': '#546E7A',
@@ -41,22 +41,40 @@ const TOKEN_COLORS: Record<string, string> = {
   'hljs-punctuation': '#89DDFF',
 }
 
+const TOKEN_COLORS_LIGHT: Record<string, string> = {
+  'hljs-keyword': '#7C3AED',
+  'hljs-string': '#16A34A',
+  'hljs-comment': '#9CA3AF',
+  'hljs-number': '#EA580C',
+  'hljs-function': '#2563EB',
+  'hljs-title': '#2563EB',
+  'hljs-built_in': '#D97706',
+  'hljs-type': '#D97706',
+  'hljs-literal': '#DC2626',
+  'hljs-variable': '#111827',
+  'hljs-attr': '#7C3AED',
+  'hljs-name': '#BE185D',
+  'hljs-tag': '#BE185D',
+  'hljs-operator': '#0891B2',
+  'hljs-punctuation': '#0891B2',
+}
+
 type HastNode =
   | { type: 'text'; value: string }
   | { type: 'element'; tagName: string; properties: { className?: string[] }; children: HastNode[] }
   | { type: string }
 
-function renderHast(nodes: HastNode[], key = 0): React.ReactNode[] {
+function renderHast(nodes: HastNode[], tokenColors: Record<string, string>, key = 0): React.ReactNode[] {
   return nodes.map((node, i) => {
     if (node.type === 'text' && 'value' in node) {
       return node.value
     }
     if (node.type === 'element' && 'children' in node) {
       const cls = node.properties?.className ?? []
-      const color = cls.map((c: string) => TOKEN_COLORS[c]).find(Boolean)
+      const color = cls.map((c: string) => tokenColors[c]).find(Boolean)
       return (
         <span key={`${key}-${i}`} style={color ? { color } : undefined}>
-          {renderHast(node.children, i)}
+          {renderHast(node.children, tokenColors, i)}
         </span>
       )
     }
@@ -64,11 +82,11 @@ function renderHast(nodes: HastNode[], key = 0): React.ReactNode[] {
   })
 }
 
-function highlight(code: string, language: string): React.ReactNode[] {
+function highlight(code: string, language: string, tokenColors: Record<string, string>): React.ReactNode[] {
   if (!code || language === 'plaintext') return [code]
   try {
     const result = lowlight.highlight(language, code)
-    return renderHast(result.children as HastNode[])
+    return renderHast(result.children as HastNode[], tokenColors)
   } catch {
     return [code]
   }
@@ -98,9 +116,20 @@ function CodeBlockRender({
 }) {
   const [copied, setCopied] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { colorScheme } = useMantineColorScheme()
+  const isDark = colorScheme === 'dark'
 
   const code = block.props.code
   const language = block.props.language
+
+  const tokenColors = isDark ? TOKEN_COLORS_DARK : TOKEN_COLORS_LIGHT
+  const bgColor = isDark ? '#2F2F2F' : '#F8F8F8'
+  const textColor = isDark ? '#E6E6E6' : '#1F2937'
+  const borderColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'
+  const labelColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)'
+  const iconColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)'
+  const chevronColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+  const caretColor = isDark ? 'white' : 'black'
 
   // 새로 생성된 블록(빈 코드)이면 textarea에 자동 포커스
   // setTimeout: BlockNote가 content:none 블록 생성 후 커서를 다음 블록으로 이동시키는 것을 기다린 뒤 재포커스
@@ -155,15 +184,15 @@ function CodeBlockRender({
     setTimeout(() => setCopied(false), 2000)
   }, [code])
 
-  const highlighted = highlight(code, language)
+  const highlighted = highlight(code, language, tokenColors)
 
   return (
     <div
       style={{
-        backgroundColor: '#2F2F2F',
+        backgroundColor: bgColor,
         borderRadius: '6px',
         fontFamily: 'var(--mantine-font-family-monospace)',
-        color: '#E6E6E6',
+        color: textColor,
         margin: '4px 0',
         overflow: 'hidden',
         width: '100%',
@@ -178,7 +207,7 @@ function CodeBlockRender({
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '6px 12px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          borderBottom: `1px solid ${borderColor}`,
         }}
       >
         <Select
@@ -193,14 +222,14 @@ function CodeBlockRender({
           comboboxProps={{ withinPortal: true }}
           styles={{
             input: {
-              color: 'rgba(255,255,255,0.45)',
+              color: labelColor,
               fontSize: '12px',
               cursor: 'pointer',
               minHeight: 'unset',
               height: '24px',
               lineHeight: '24px',
             },
-            section: { color: 'rgba(255,255,255,0.3)' },
+            section: { color: chevronColor },
           }}
           w={120}
         />
@@ -209,7 +238,7 @@ function CodeBlockRender({
           variant="subtle"
           onMouseDown={(e) => e.stopPropagation()}
           onClick={handleCopy}
-          style={{ color: 'rgba(255,255,255,0.45)' }}
+          style={{ color: iconColor }}
           title="복사"
         >
           {copied ? <Check size={13} /> : <Copy size={13} />}
@@ -230,7 +259,7 @@ function CodeBlockRender({
             fontFamily: 'inherit',
             fontSize: '13px',
             lineHeight: '1.6',
-            color: '#E6E6E6',
+            color: textColor,
             minHeight: '20px',
           }}
         >
@@ -256,7 +285,7 @@ function CodeBlockRender({
             border: 'none',
             background: 'transparent',
             color: 'transparent',
-            caretColor: 'white',
+            caretColor: caretColor,
             fontFamily: 'inherit',
             fontSize: '13px',
             lineHeight: '1.6',
