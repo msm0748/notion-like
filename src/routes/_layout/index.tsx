@@ -10,6 +10,7 @@ import {
 } from '@mantine/core';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { FileText, Plus, Clock, Star } from 'lucide-react';
 import { useAuth } from '@/entities/auth';
 import { pagesQueryOptions } from '@/entities/pages';
@@ -113,6 +114,10 @@ function RouteComponent() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const greeting = getGreeting();
+
+  useEffect(() => {
+    document.title = '홈';
+  }, []);
   const displayName = user?.full_name?.split(' ')[0] ?? user?.name ?? '사용자';
 
   const { data: pages = [], isLoading } = useQuery(pagesQueryOptions.list());

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Box, Text, Group, rem, Stack, Modal, Button } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
@@ -18,6 +18,10 @@ export const Route = createFileRoute('/_layout/trash/')({
 });
 
 function TrashPage() {
+  useEffect(() => {
+    document.title = '휴지통';
+  }, []);
+
   const { data: trashedPages = [], isLoading } = useQuery(
     pagesQueryOptions.trash(),
   );
