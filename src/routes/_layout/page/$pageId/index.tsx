@@ -4,11 +4,10 @@ import { Box, Title } from '@mantine/core';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
-import type { Block } from '@blocknote/core';
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
 import { useUpdatePageMutation, useCreatePageMutation, useDeletePageMutation } from '@/features/pages';
-import { EditorContent, type EditorContentHandle } from '@/features/editor';
+import { EditorContent, type EditorContentHandle, type EditorBlock } from '@/features/editor';
 
 export const Route = createFileRoute('/_layout/page/$pageId/')({
   component: PageEditor,
@@ -30,7 +29,7 @@ function PageEditor() {
   // 최신값을 인자로 받아 debounce — ref를 클로저에 닫지 않아 lint 경고 없음
   const savePage = useMemo(
     () =>
-      debounce((id: string, title: string, content?: Block[]) => {
+      debounce((id: string, title: string, content?: EditorBlock[]) => {
         updatePage({
           pageId: id,
           title,
@@ -59,7 +58,7 @@ function PageEditor() {
   }, [page]);
 
   // 현재 content를 ref로 추적 (title 변경 시에도 최신 content 전달용)
-  const contentRef = useRef<Block[] | undefined>(undefined);
+  const contentRef = useRef<EditorBlock[] | undefined>(undefined);
 
   const updateTitleEmpty = () => {
     const el = titleRef.current;
@@ -78,7 +77,7 @@ function PageEditor() {
   };
 
   const handleContentChange = useCallback(
-    (content: Block[]) => {
+    (content: EditorBlock[]) => {
       contentRef.current = content;
       const title = titleRef.current?.textContent ?? '';
       savePage(pageId, title, content);
@@ -108,7 +107,7 @@ function PageEditor() {
   }, [createPage, pageId, navigate]);
 
   const initialContent = Array.isArray(page?.content)
-    ? (page.content as Block[])
+    ? (page.content as EditorBlock[])
     : undefined;
 
   return (

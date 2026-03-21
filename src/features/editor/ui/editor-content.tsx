@@ -1,6 +1,5 @@
 import '@blocknote/core/fonts/inter.css'
 import '@blocknote/mantine/style.css'
-import type { Block } from '@blocknote/core'
 import { Box } from '@mantine/core'
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { FileText } from 'lucide-react'
@@ -16,16 +15,16 @@ import {
   getDefaultReactSlashMenuItems,
 } from '@blocknote/react'
 import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-types'
-import { editorSchema } from '../conf/editor-schema'
+import { editorSchema, type EditorBlock } from '../conf/editor-schema'
 
-function collectSubPageIds(blocks: Block[]): Set<string> {
+function collectSubPageIds(blocks: EditorBlock[]): Set<string> {
   const ids = new Set<string>()
   for (const block of blocks) {
-    if (block.type === 'subPageLink' && (block.props as { pageId?: string }).pageId) {
-      ids.add((block.props as { pageId: string }).pageId)
+    if (block.type === 'subPageLink' && block.props.pageId) {
+      ids.add(block.props.pageId)
     }
     if (block.children?.length) {
-      for (const id of collectSubPageIds(block.children as Block[])) {
+      for (const id of collectSubPageIds(block.children)) {
         ids.add(id)
       }
     }
@@ -34,8 +33,8 @@ function collectSubPageIds(blocks: Block[]): Set<string> {
 }
 
 interface EditorContentProps {
-  initialContent?: Block[]
-  onChange?: (content: Block[]) => void
+  initialContent?: EditorBlock[]
+  onChange?: (content: EditorBlock[]) => void
   onCreateSubPage?: () => Promise<string | undefined>
   onDeleteSubPage?: (pageId: string) => void
 }
@@ -66,7 +65,7 @@ export const EditorContent = forwardRef<EditorContentHandle, EditorContentProps>
 
   useEffect(() => {
     return editor.onChange(() => {
-      const doc = editor.document as Block[]
+      const doc = editor.document as EditorBlock[]
       onChange?.(doc)
 
       if (onDeleteSubPage) {

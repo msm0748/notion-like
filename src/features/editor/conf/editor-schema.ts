@@ -122,3 +122,5 @@ export const editorSchema = BlockNoteSchema.create({
     subPageLink: subPageLinkBlock(),
   },
 })
+
+export type EditorBlock = (typeof editorSchema)['Block']
