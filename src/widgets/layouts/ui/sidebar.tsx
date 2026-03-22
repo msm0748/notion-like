@@ -23,6 +23,7 @@ import {
 
 import { pagesQueryOptions } from '@/entities/pages';
 import { PageRow } from './page-row';
+import { useRootPageId } from '../model/use-root-page-id';
 
 const sectionLabelSx = {
   fontSize: '12px',
@@ -50,6 +51,7 @@ export function Sidebar() {
   const { mutateAsync: deletePage } = useDeletePageMutation();
   const { mutate: toggleFavorite } = useToggleFavoriteMutation();
   const { pageId: currentPageId } = useParams({ strict: false });
+  const rootActivePageId = useRootPageId(currentPageId);
 
   const handleAddPage = async () => {
     if (!user) return;
@@ -138,7 +140,7 @@ export function Sidebar() {
               <PageRow
                 key={page.id}
                 page={page}
-                currentPageId={currentPageId}
+                currentPageId={rootActivePageId}
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
@@ -188,7 +190,7 @@ export function Sidebar() {
               <PageRow
                 key={page.id}
                 page={page}
-                currentPageId={currentPageId}
+                currentPageId={rootActivePageId}
                 isFavorite={favoritePageIds.has(page.id)}
                 onToggleFavorite={toggleFavorite}
                 onDelete={handleDeletePage}
