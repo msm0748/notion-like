@@ -122,6 +122,33 @@ create policy "Users can update own favorites"
 create policy "Users can delete own favorites"
   on favorites for delete
   using (auth.uid() = "userId");
+
+-- 이미지 스토리지 버킷
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'page-images',
+  'page-images',
+  true,
+  10485760,
+  array['image/jpeg','image/png','image/gif','image/webp','image/svg+xml']
+);
+
+-- 스토리지 RLS 정책
+create policy "Authenticated users can upload images"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'page-images');
+
+create policy "Anyone can view page images"
+  on storage.objects for select
+  using (bucket_id = 'page-images');
+
+create policy "Users can update own images"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'page-images' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "Users can delete own images"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'page-images' and (storage.foldername(name))[1] = auth.uid()::text);
 ```
 
 ### 5. Google 로그인 설정

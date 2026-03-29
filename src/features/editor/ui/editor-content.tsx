@@ -2,6 +2,7 @@ import { Box } from '@mantine/core';
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { FileText } from 'lucide-react';
 import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
+import { uploadFile } from '@/shared/utils/storage';
 import { BlockNoteView } from '@blocknote/mantine';
 import {
   AddBlockButton,
@@ -80,6 +81,7 @@ export const EditorContent = forwardRef<
   const editor = useCreateBlockNote({
     schema: editorSchema,
     initialContent: migratedContent,
+    uploadFile,
   });
 
   useImperativeHandle(ref, () => ({
