@@ -21,7 +21,8 @@ export function TopNav({ pageId }: TopNavProps) {
         position: 'sticky',
         top: 0,
         backgroundColor: 'var(--mantine-color-body)',
-        zIndex: 10,
+        /* BlockNote 테이블 핸들(z≈10)이 상단으로 비칠 때 내비 아래에 가려지도록 */
+        zIndex: 25,
       }}
     >
       <Group gap="xs">

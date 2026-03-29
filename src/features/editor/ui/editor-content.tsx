@@ -1,7 +1,11 @@
 import { Box } from '@mantine/core';
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { FileText } from 'lucide-react';
-import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
+import {
+  CONTENT_MAX_WIDTH,
+  CONTENT_OVERLAY_INSET_X,
+  CONTENT_PADDING_X,
+} from '@/shared/conf/constant';
 import { BlockNoteView } from '@blocknote/mantine';
 import {
   AddBlockButton,
@@ -17,24 +21,24 @@ import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
 type RawBlock = {
-  type: string
-  content?: unknown
-  props?: Record<string, unknown>
-  children?: RawBlock[]
-  [key: string]: unknown
-}
+  type: string;
+  content?: unknown;
+  props?: Record<string, unknown>;
+  children?: RawBlock[];
+  [key: string]: unknown;
+};
 
 // 구 커스텀 codeBlock(props.code 형식) → 공식 인라인 content 형식으로 마이그레이션
 function migrateBlocks(blocks: RawBlock[]): RawBlock[] {
   return blocks.map((block) => {
     if (block.type === 'codeBlock' && typeof block.props?.code === 'string') {
-      const code = block.props.code
-      const language = (block.props.language as string | undefined) ?? 'text'
+      const code = block.props.code;
+      const language = (block.props.language as string | undefined) ?? 'text';
       return {
         ...block,
         props: { language },
         content: code ? [{ type: 'text', text: code, styles: {} }] : [],
-      }
+      };
     }
     if (block.children?.length) {
       return { ...block, children: migrateBlocks(block.children) };
@@ -144,11 +148,20 @@ export const EditorContent = forwardRef<
     <Box
       sx={{
         flex: 1,
-        overflowY: 'auto',
+        minWidth: 0,
         cursor: 'text',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        position: 'relative',
+        zIndex: 1,
+        /*
+         * BlockNote 테이블/사이드 메뉴는 position:fixed + 뷰포트 기준이라 제목 위로 비침.
+         * transform으로 containing block을 이 스크롤 박스로 두고, overflow로 밖으로 나간 그림을 자름.
+         */
+        transform: 'translateZ(0)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
       }}
       pt="xl"
       onClick={handleClickOutsideEditor}
@@ -157,8 +170,10 @@ export const EditorContent = forwardRef<
         sx={{
           width: '100%',
           maxWidth: CONTENT_MAX_WIDTH,
-          paddingLeft: CONTENT_PADDING_X,
-          paddingRight: CONTENT_PADDING_X,
+          minWidth: 0,
+          overflowX: 'auto',
+          paddingLeft: CONTENT_PADDING_X + CONTENT_OVERLAY_INSET_X,
+          paddingRight: CONTENT_PADDING_X + CONTENT_OVERLAY_INSET_X,
           /* BlockNote 기본 padding-inline(54px) 제거 → 래퍼 패딩만 사용해 타이틀과 정렬 */
           '& .bn-editor': { paddingInline: 0 },
           /* 에디터 내 h2~h6 크기: h2 30px 기준으로 단계별 조정 */
@@ -172,6 +187,20 @@ export const EditorContent = forwardRef<
             { transform: 'translateY(-18px)' },
           '& :where(.bn-side-menu)[data-block-type="heading"][data-level="2"]':
             { transform: 'translateY(-4px)' },
+
+          /* 테이블: 셀 안 중첩 bn-block-group 기본 margin-left(24px) 제거 → 본문이 바깥 단락과 좌측 정렬 맞춤 */
+          '& .bn-editor [data-content-type="table"] .bn-block-group .bn-block-group':
+            { marginLeft: 0 },
+          '& .bn-editor [data-content-type="table"] .bn-block-group .bn-block-group > .bn-block-outer::before':
+            { display: 'none' },
+          /*
+           * 테이블 좌측 패딩(핸들용 ~9px)이 표 전체를 오른쪽으로 밀어 단락과 어긋남.
+           * 행 핸들은 셀 border 밖 여백·오버플로로 대부분 동작 → 좌측 패딩 제거
+           */
+          '& .bn-editor [data-content-type="table"] .tableWrapper': {
+            paddingLeft: 0,
+          },
+
           /* codeBlock 커스텀 스타일: @blocknote/core 기본 스타일 초기화 */
           '& .bn-block-content[data-content-type="codeBlock"]': {
             display: 'block',

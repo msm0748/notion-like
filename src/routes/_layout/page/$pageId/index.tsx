@@ -4,7 +4,11 @@ import { Box, Title } from '@mantine/core';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
-import { CONTENT_MAX_WIDTH, CONTENT_PADDING_X } from '@/shared/conf/constant';
+import {
+  CONTENT_MAX_WIDTH,
+  CONTENT_OVERLAY_INSET_X,
+  CONTENT_PADDING_X,
+} from '@/shared/conf/constant';
 import { pagesQueryOptions } from '@/entities/pages';
 import {
   useUpdatePageMutation,
@@ -137,7 +141,12 @@ function PageEditor() {
           flexDirection: 'column',
           alignItems: 'center',
           width: '100%',
-          marginTop: '80px',
+          /* margin이면 TopNav 아래 여백은 배경이 없어 fixed 테이블 UI가 그대로 보임 → padding으로 동일 간격 유지 */
+          paddingTop: '80px',
+          position: 'relative',
+          zIndex: 15,
+          flexShrink: 0,
+          backgroundColor: 'var(--mantine-color-body)',
         }}
       >
         <Title
@@ -154,8 +163,8 @@ function PageEditor() {
             minHeight: '2.75rem',
             width: '100%',
             maxWidth: CONTENT_MAX_WIDTH,
-            paddingLeft: CONTENT_PADDING_X,
-            paddingRight: CONTENT_PADDING_X,
+            paddingLeft: CONTENT_PADDING_X + CONTENT_OVERLAY_INSET_X,
+            paddingRight: CONTENT_PADDING_X + CONTENT_OVERLAY_INSET_X,
             '&[data-empty="true"]::after': {
               content: '"제목없음"',
               color: 'var(--mantine-color-dimmed)',
