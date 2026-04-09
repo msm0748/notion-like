@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@blocknote/code-block':
-        specifier: 0.47.1
-        version: 0.47.1(@blocknote/core@0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0))
+        specifier: 0.47.3
+        version: 0.47.3(@blocknote/core@0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0))
       '@blocknote/core':
         specifier: ^0.47.3
         version: 0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0)
@@ -210,10 +210,10 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@blocknote/code-block@0.47.1':
-    resolution: {integrity: sha512-gZmLkJupX0uKukTvEiNjcW9FRJW5iNoAaEYF1SGMbBw2cTi+eC+Nyqjgy+8MF7k5A87/TgoA8RQPqNqrRWyHlg==}
+  '@blocknote/code-block@0.47.3':
+    resolution: {integrity: sha512-kvd9SDSfmoo2Vok2u6RBhjDltzWgDTsg//PfcF584S1soXlVBtZEv4MweGErDjhYr7xBPPFnxXqgLBoCjGTJvA==}
     peerDependencies:
-      '@blocknote/core': ^0.47.1
+      '@blocknote/core': 0.47.3
 
   '@blocknote/core@0.47.3':
     resolution: {integrity: sha512-+YIOEXmmRXzDULYlQaycaFDofwQ/W79CWsU3GwNuRzp62QC+WpRLFLkgkoU4Pb1Vo7RvmzU1+udESdNUGhO2KA==}
@@ -2713,7 +2713,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@blocknote/code-block@0.47.1(@blocknote/core@0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0))':
+  '@blocknote/code-block@0.47.3(@blocknote/core@0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0))':
     dependencies:
       '@blocknote/core': 0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0)
       '@shikijs/core': 3.23.0
