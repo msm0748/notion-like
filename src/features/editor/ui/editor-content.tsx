@@ -128,7 +128,7 @@ export const EditorContent = forwardRef<
         e.preventDefault();
         editor.updateBlock(block, {
           type: 'codeBlock',
-          props: { language: 'text' },
+          props: { language: 'shellscript' },
           content: [],
         });
         editor.setTextCursorPosition(block, 'start');
