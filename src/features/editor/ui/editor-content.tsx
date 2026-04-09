@@ -129,7 +129,9 @@ export const EditorContent = forwardRef<
         editor.updateBlock(block, {
           type: 'codeBlock',
           props: { language: 'text' },
+          content: [],
         });
+        editor.setTextCursorPosition(block, 'start');
       }
     }
   };
