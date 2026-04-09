@@ -17,33 +17,6 @@ import { DragHandleMenuWithBlockTypes } from './drag-handle-menu-with-block-type
 import { SlashMenu } from './slash-menu';
 import { editorSchema, type EditorBlock } from '../conf/editor-schema';
 
-type RawBlock = {
-  type: string;
-  content?: unknown;
-  props?: Record<string, unknown>;
-  children?: RawBlock[];
-  [key: string]: unknown;
-};
-
-// 구 커스텀 codeBlock(props.code 형식) → 공식 인라인 content 형식으로 마이그레이션
-function migrateBlocks(blocks: RawBlock[]): RawBlock[] {
-  return blocks.map((block) => {
-    if (block.type === 'codeBlock' && typeof block.props?.code === 'string') {
-      const code = block.props.code;
-      const language = (block.props.language as string | undefined) ?? 'text';
-      return {
-        ...block,
-        props: { language },
-        content: code ? [{ type: 'text', text: code, styles: {} }] : [],
-      };
-    }
-    if (block.children?.length) {
-      return { ...block, children: migrateBlocks(block.children) };
-    }
-    return block;
-  });
-}
-
 function collectSubPageIds(blocks: EditorBlock[]): Set<string> {
   const ids = new Set<string>();
   for (const block of blocks) {
@@ -74,13 +47,9 @@ export const EditorContent = forwardRef<
   EditorContentHandle,
   EditorContentProps
 >(({ initialContent, onChange, onCreateSubPage, onDeleteSubPage }, ref) => {
-  const migratedContent = initialContent
-    ? (migrateBlocks(initialContent) as EditorBlock[])
-    : undefined;
-
   const editor = useCreateBlockNote({
     schema: editorSchema,
-    initialContent: migratedContent,
+    initialContent,
     uploadFile,
   });
 
@@ -115,7 +84,7 @@ export const EditorContent = forwardRef<
   }, [editor, onChange, onDeleteSubPage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === '`') {
+    if (e.key === ' ') {
       const block = editor.getTextCursorPosition().block;
       const content = block.content;
       if (
@@ -123,12 +92,14 @@ export const EditorContent = forwardRef<
         Array.isArray(content) &&
         content.length === 1 &&
         content[0].type === 'text' &&
-        content[0].text === '``'
+        content[0].text.match(/^```(.*)$/)
       ) {
+        const match = content[0].text.match(/^```(.*)$/);
+        const lang = match?.[1]?.trim() || 'shellscript';
         e.preventDefault();
         editor.updateBlock(block, {
           type: 'codeBlock',
-          props: { language: 'shellscript' },
+          props: { language: lang },
           content: [],
         });
         editor.setTextCursorPosition(block, 'start');
@@ -175,17 +146,10 @@ export const EditorContent = forwardRef<
           '& :where(.bn-side-menu)[data-block-type="heading"][data-level="2"]':
             { transform: 'translateY(-4px)' },
 
-          /* codeBlock 커스텀 스타일: @blocknote/core 기본 스타일 초기화 */
-          '& .bn-block-content[data-content-type="codeBlock"]': {
-            display: 'block',
-            width: '100%',
-            backgroundColor: 'transparent !important',
-            borderRadius: '0 !important',
-            color: 'inherit !important',
-            padding: '0 !important',
-          },
-          '& .bn-block-content[data-content-type="codeBlock"] > pre': {
-            display: 'none !important',
+          /* codeBlock 언어 선택기 항상 표시 */
+          '& .bn-block-content[data-content-type="codeBlock"] select': {
+            opacity: '1 !important',
+            visibility: 'visible !important' as any,
           },
         }}
       >

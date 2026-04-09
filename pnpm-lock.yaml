@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@blocknote/code-block':
-        specifier: 0.47.3
+        specifier: ^0.47.3
         version: 0.47.3(@blocknote/core@0.47.3(@types/hast@3.0.4)(highlight.js@11.11.1)(lowlight@3.3.0))
       '@blocknote/core':
         specifier: ^0.47.3

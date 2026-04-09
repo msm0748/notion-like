@@ -1,6 +1,7 @@
 import {
   BlockNoteSchema,
   createBlockSpec,
+  createCodeBlockSpec,
   createExtension,
   createHeadingBlockConfig,
   createToggleWrapper,
@@ -9,8 +10,8 @@ import {
   parseDefaultProps,
 } from '@blocknote/core'
 import type { HeadingOptions } from '@blocknote/core'
+import { codeBlockOptions } from '@blocknote/code-block'
 import { subPageLinkBlock } from '../ui/sub-page-link-block'
-import { codeBlock } from '../ui/code-block'
 
 const HEADING_LEVELS = [1, 2, 3] as const
 
@@ -119,7 +120,7 @@ const createHeadingBlockSpecShifted = createBlockSpec(
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    codeBlock: codeBlock(),
+    codeBlock: createCodeBlockSpec(codeBlockOptions),
     heading: createHeadingBlockSpecShifted(),
     subPageLink: subPageLinkBlock(),
   },
