@@ -120,7 +120,27 @@ const createHeadingBlockSpecShifted = createBlockSpec(
 export const editorSchema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    codeBlock: createCodeBlockSpec(codeBlockOptions),
+    codeBlock: createCodeBlockSpec({
+      ...codeBlockOptions,
+      defaultLanguage: 'shellscript',
+      supportedLanguages: {
+        text: { name: 'Plain Text', aliases: ['text', 'txt'] },
+        javascript: { name: 'JavaScript', aliases: ['javascript', 'js'] },
+        typescript: { name: 'TypeScript', aliases: ['typescript', 'ts'] },
+        jsx: { name: 'JSX', aliases: ['jsx'] },
+        tsx: { name: 'TSX', aliases: ['tsx'] },
+        python: { name: 'Python', aliases: ['python', 'py'] },
+        rust: { name: 'Rust', aliases: ['rust', 'rs'] },
+        go: { name: 'Go', aliases: ['go'] },
+        shellscript: { name: 'Bash', aliases: ['shellscript', 'bash', 'sh', 'zsh'] },
+        html: { name: 'HTML', aliases: ['html'] },
+        css: { name: 'CSS', aliases: ['css'] },
+        json: { name: 'JSON', aliases: ['json'] },
+        sql: { name: 'SQL', aliases: ['sql'] },
+        yaml: { name: 'YAML', aliases: ['yaml', 'yml'] },
+        markdown: { name: 'Markdown', aliases: ['markdown', 'md'] },
+      },
+    }),
     heading: createHeadingBlockSpecShifted(),
     subPageLink: subPageLinkBlock(),
   },
